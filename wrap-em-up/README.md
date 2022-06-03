@@ -7,6 +7,7 @@ It's a bit stoopid though (e.g., Python syntax, non-code brackets (i.e., comment
 
 ```
 README.md
+
 const aJsFunction = () => {
   console.log("I don't like curly brackets")
   
@@ -18,6 +19,7 @@ const aJsFunction = () => {
 Output from `wrap-em-up -f andMore: { " -e " }" -c "more:" -r README.md`
 ```
 README.md.tmp
+
 const aJsFunction = () => {
   console.log("I don't like curly brackets")
   
