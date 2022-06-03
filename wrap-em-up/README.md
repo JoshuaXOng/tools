@@ -15,7 +15,7 @@ const aJsFunction = () => {
 }
 ```
 
-Output from "wrap-em-up -f andMore: { " -e " }" -c "more:" -r README.md
+Output from `wrap-em-up -f andMore: { " -e " }" -c "more:" -r README.md`
 README.md.tmp
 ```
 const aJsFunction = () => {
