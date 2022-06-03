@@ -43,10 +43,10 @@ fn main() -> Result<()> {
 		
 		let file_str = entry.as_ref().unwrap().file_name().to_str();
 		match (&regex_filter, file_str) {
-			(Some(regex_filter), Some(file_str)) => { if !regex_filter.is_match(file_str) { continue } },
+			(Some(regex_filter), Some(file_str)) => { if !regex_filter.is_match(file_str) { continue } else { println!("Modifying {}", file_str) } },
 			(Some(_), None) => { println!("Entry filtering might have failed."); continue }
 			(None, Some(file_str)) => { println!("Modifying {}", file_str) }
-			_ => { println!("Modifying file...") },
+			(None, None) => { println!("Modifying file...") },
 		}
 
 		let file = File::open(entry.as_ref().unwrap().path());
