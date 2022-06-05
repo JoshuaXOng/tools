@@ -31,11 +31,11 @@ fn main() -> Result<()> {
 	});
 
 	for entry in WalkDir::new(root_dir) {
-		let metadata = entry.as_ref().map_err(|error| {
-			println!("Failed to walk entry: \n{}", error)
+		let metadata = entry.as_ref().map_err(|_| {
+			println!("Entry skipped - {}", "WalkDir error".italic())
 		}).and_then(|entry| {
-			entry.metadata().map_err(|error| {
-				println!("Entry does not exist or privileges block usage: {}", error)
+			entry.metadata().map_err(|_| {
+				println!("Entry skipped - {}", "entry does not exist or privileges block usage".italic())
 			})
 		}).ok();
 		if metadata.is_some() && metadata.unwrap().is_dir() {
@@ -49,18 +49,18 @@ fn main() -> Result<()> {
 				if !regex_filter.is_match(file_str) { 
 					continue 
 				} else { 
-					println!("Modifying {}", file_str) 
+					println!("Proceeding with {}", file_str) 
 				} 
 			},
 			(Some(_), None) => { 
-				println!("Entry filtering might have failed."); 
+				println!("File skipped - {}", "filter cannot check file name".italic()); 
 				continue 
 			},
 			(None, Some(file_str)) => { 
-				println!("Modifying {}", file_str) 
+				println!("Proceeding with {}", file_str) 
 			},
 			(None, None) => { 
-				println!("Modifying file...") 
+				println!("Proceeding with file... - {}", "file name unknown".italic()) 
 			},
 		}
 
@@ -70,8 +70,8 @@ fn main() -> Result<()> {
 			let _ = file.read_to_string(&mut file_contents);
 			Ok(file_contents)
 		});
-		if let Err(error) = file_contents { 
-			print!("Failed to open file: {}", &error); 
+		if let Err(_) = file_contents { 
+			print!("File skipped - {}", "failed to open file".italic()); 
 			continue 
 		};
 		let file_contents = file_contents.as_mut().unwrap();
@@ -111,7 +111,7 @@ fn main() -> Result<()> {
 			file_new_contents.insert_str(end_index.unwrap(), args.end_wrapper.as_str());
 			file_new_contents.insert_str(start_index, args.front_wrapper.as_str());
 			if let Err(error) = write(String::from(entry.path().as_os_str().to_str().unwrap())+".tmp", &file_new_contents) {
-				println!("Failed to write new file: \n{}", error);
+				println!("{}", "Failed to write new file".italic());
 			}
 		}
 	}

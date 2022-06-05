@@ -12,18 +12,18 @@ const aJsFunction = () => {
   console.log("I don't like curly brackets")
   
   # How about another then?
-  const moreCurlyBrackets = { more: { yaya: [] } }
+  const moreCurlyBrackets = { andMore: {more: { yaya: [] } } }
 }
 ```
 
-Output from `wrap-em-up -f andMore: { " -e " }" -c "more:" -r \w*.md$`
+Output from `wrap-em-up -f andMore: { " -e " }" -c "andMore: {more:" -r \w*.md$`
 ```
 README.md.tmp
 
-const aJsFunction = () => {
+const aJsFunction = () } => {
   console.log("I don't like curly brackets")
   
   # How about another then?
-  const moreCurlyBrackets = { andMore: { more: { yaya: [] } } }
+  const moreCurlyBrackets = { andMore: { andMore: {more: { yaya: [] } } } }
 }
 ```
