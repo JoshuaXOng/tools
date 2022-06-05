@@ -110,7 +110,7 @@ fn main() -> Result<()> {
 
 			file_new_contents.insert_str(end_index.unwrap(), args.end_wrapper.as_str());
 			file_new_contents.insert_str(start_index, args.front_wrapper.as_str());
-			if let Err(error) = write(String::from(entry.path().as_os_str().to_str().unwrap())+".tmp", &file_new_contents) {
+			if let Err(_) = write(String::from(entry.path().as_os_str().to_str().unwrap())+".tmp", &file_new_contents) {
 				println!("{}", "Failed to write new file".italic());
 			}
 		}
