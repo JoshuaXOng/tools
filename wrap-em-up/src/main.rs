@@ -2,6 +2,7 @@ use std::{env, io::{Result, Read}, fs::{File, write}, collections::{HashMap}};
 use walkdir::{WalkDir};
 use clap::Parser;
 use regex::Regex;
+use colored::Colorize;
 
 #[derive(Parser)]
 struct Args {
@@ -22,7 +23,7 @@ fn main() -> Result<()> {
 
 	match root_dir.to_str() {
 		Some(root_dir) => println!("Root Directory: {} \n", root_dir),
-		_ => println!("Root Directory: Can't Print - Probs Not UTF-8 \n")
+		_ => println!("Root Directory: {} \n", "Can't Print - Probs Not UTF-8".italic())
 	}
 
 	let regex_filter = args.regex_filter.as_ref().and_then(|regex_filter| { 
@@ -40,26 +41,44 @@ fn main() -> Result<()> {
 		if metadata.is_some() && metadata.unwrap().is_dir() {
 			continue;
 		}
+		let entry = entry.as_ref().unwrap();
 		
-		let file_str = entry.as_ref().unwrap().file_name().to_str();
+		let file_str = entry.file_name().to_str();
 		match (&regex_filter, file_str) {
-			(Some(regex_filter), Some(file_str)) => { if !regex_filter.is_match(file_str) { continue } else { println!("Modifying {}", file_str) } },
-			(Some(_), None) => { println!("Entry filtering might have failed."); continue }
-			(None, Some(file_str)) => { println!("Modifying {}", file_str) }
-			(None, None) => { println!("Modifying file...") },
+			(Some(regex_filter), Some(file_str)) => { 
+				if !regex_filter.is_match(file_str) { 
+					continue 
+				} else { 
+					println!("Modifying {}", file_str) 
+				} 
+			},
+			(Some(_), None) => { 
+				println!("Entry filtering might have failed."); 
+				continue 
+			},
+			(None, Some(file_str)) => { 
+				println!("Modifying {}", file_str) 
+			},
+			(None, None) => { 
+				println!("Modifying file...") 
+			},
 		}
 
-		let file = File::open(entry.as_ref().unwrap().path());
+		let file = File::open(entry.path());
 		let mut file_contents = file.and_then(|mut file| {
 			let mut file_contents = String::new();
 			let _ = file.read_to_string(&mut file_contents);
 			Ok(file_contents)
 		});
-		if let Err(error) = file_contents { print!("Failed to open file: {}", &error); continue };
+		if let Err(error) = file_contents { 
+			print!("Failed to open file: {}", &error); 
+			continue 
+		};
+		let file_contents = file_contents.as_mut().unwrap();
 
-		let mut file_new_contents = file_contents.as_mut().unwrap().clone();
+		let mut file_new_contents = file_contents.clone();
 
-		let mut target_indices: Vec<_> = file_contents.as_ref().unwrap().match_indices(&args.code_matcher).collect();
+		let mut target_indices: Vec<_> = file_contents.match_indices(&args.code_matcher).collect();
 		target_indices.reverse();
 		for (target_index, _) in target_indices {
 			let mut bracket_counters = HashMap::from([("(", 0), (")", 0), ("[", 0), ("]", 0), ("{", 0), ("}", 0)]);
@@ -67,7 +86,7 @@ fn main() -> Result<()> {
 			let start_index = target_index;
 			let mut end_index = None;
 
-			for (inner_index, letter) in (&file_contents.as_ref().unwrap().as_str()[target_index..]).chars().enumerate() {
+			for (inner_index, letter) in (&file_contents.as_str()[target_index..]).chars().enumerate() {
 				#[allow(unused_parens)]
 				if (
 					(bracket_counters.get("(").unwrap() != &0 || 
@@ -91,7 +110,7 @@ fn main() -> Result<()> {
 
 			file_new_contents.insert_str(end_index.unwrap(), args.end_wrapper.as_str());
 			file_new_contents.insert_str(start_index, args.front_wrapper.as_str());
-			if let Err(error) = write(String::from(entry.as_ref().unwrap().path().as_os_str().to_str().unwrap())+".tmp", &file_new_contents) {
+			if let Err(error) = write(String::from(entry.path().as_os_str().to_str().unwrap())+".tmp", &file_new_contents) {
 				println!("Failed to write new file: \n{}", error);
 			}
 		}
