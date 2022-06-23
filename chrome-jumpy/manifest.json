@@ -1,0 +1,21 @@
+{
+  "name": "Chrome-Jumpy",
+  "description": "Jumpy inspired extension - select element based on a combination of keys.",
+  "version": "1.0",
+  "manifest_version": 3,
+  "permissions": ["storage", "tabs", "scripting"],
+  "host_permissions": ["http://*/", "https://*/"],
+  "background": {
+    "service_worker": "src/service-worker.js"
+  },
+  "action": {
+    "default_icon": "assets/gunther-pixelated.png",
+    "default_popup": "src/popup.html"
+  },
+  "commands": {
+    "_execute_action": {
+        "suggested_key": "Ctrl+M",
+        "description": "Open/Close"
+      }
+  }
+}
