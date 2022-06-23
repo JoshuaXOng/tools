@@ -43,39 +43,16 @@ const determineIsInteractable = (element) => {
  * @returns 
  */
 const genKeyCombChars = (noOfCombinations) => {
-  const temp = Array.from({ length: 36 }, (_, i) => i.toString(36).toUpperCase())
-  const result = [temp.slice(10), temp]
-    .reduce((a, b) => a.reduce((r, v) => r.concat(b.map(w => v + w)), []));
+  let result = [];
+
+  letters = "ZYXWVUTSRQPONMLKJIHGFEDCBA";
+  for (let i = 26; i--;)
+    for (let j = 26; j--;)
+      for (let k = 26; k--;) result.push(letters[i] + letters[j] + letters[k]);
 
   if (result.length < noOfCombinations) return;
   return result.slice(0, noOfCombinations + 1);
 }
-
-const upperKeyCombHtml = `<div style="
-  display: inline-block; 
-  position: absolute;
-  top: 0;
-  left: 0;
-  color: black;
-  text-decoration: none;"
-  >
-  <kbd style="
-    display: inline-block;
-    position: absolute;
-    top: 0;
-    left: 0;
-    padding: 0px 5px 0px 5px;
-    border: 2px solid black; 
-    box-shadow: 2px 2px black; 
-    background: lightgrey; 
-    opacity: 0.90;
-    font-weight: 600;
-    letter-spacing: .05em; 
-    white-space: nowrap;"
-  >`
-const lowerKeyCombHtml = `
-  </kdb>
-</div>`
 
 //
 // End Utilities.
@@ -83,36 +60,62 @@ const lowerKeyCombHtml = `
 
 const uuidv4 = generateUuidv4();
 
+const upperKeyCombHtml = `<div class="${uuidv4}" style="
+    display: inline-block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 0;
+    color: black;
+    text-decoration: none;"
+  >
+    <kbd style="
+      display: inline-block;
+      position: absolute;
+      top: 0;
+      left: 0;
+      padding: 0px 5px 0px 5px;
+      border: 2px solid black; 
+      box-shadow: 2px 2px black; 
+      background: lightgrey; 
+      opacity: 0.90;
+      font-weight: 600;
+      letter-spacing: .05em; 
+      white-space: nowrap;"
+    >`
+const lowerKeyCombHtml = `
+    </kdb>
+  </div>`
+
 chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
   const tab = tabs[0];
 
   chrome.scripting.executeScript({ 
     target: { tabId: tab.id },    
     injectImmediately: true,
-    args: [uuidv4, genKeyCombChars(700), upperKeyCombHtml, lowerKeyCombHtml],
-    func: (uuidv4, keyCombinationChars, upperKeyCombHtml, lowerKeyCombHtml) => {
+    args: [genKeyCombChars(1500), upperKeyCombHtml, lowerKeyCombHtml],
+    func: (keyCombinationChars, upperKeyCombHtml, lowerKeyCombHtml) => {
       const elements = document.getElementsByTagName("*");
 
       let isInteractableElements = [];      
       for (let i = 0; i < elements.length; i++) {
         if (
-          (elements[i].nodeType == 1 && (elements[i].tagName == "A" || elements[i].tagName == "INPUT")) //|| 
+          (elements[i].nodeType == 1 && (elements[i].tagName == "A" || elements[i].tagName == "INPUT" || elements[i].tagName == "BUTTON")) //|| 
           // (elements[i].scrollWidth > elements[i].clientWidth || elements[i].scrollHeight > elements[i].clientHeight)
         )
           isInteractableElements.push(elements[i]);
       }
       
-      for (let [i, interactableElements] of isInteractableElements.entries()) {
-        let keyCombination = document.createElement("div");
-        keyCombination.className = uuidv4;
-        keyCombination.innerHTML = upperKeyCombHtml + keyCombinationChars[i] + lowerKeyCombHtml;
-        interactableElements.appendChild(keyCombination);
+      for (let [i, interactableElement] of isInteractableElements.entries()) {
+        if (!interactableElement.style.position) interactableElement.style.setProperty("position", "relative");
+        interactableElement.insertAdjacentHTML("beforeend", upperKeyCombHtml + keyCombinationChars[i] + lowerKeyCombHtml);
       }
     }
   });
 });
 
-document.getElementById("keyCombinationInput").focus();
+document.getElementById("key-combination-input").focus();
 window.onblur = () => {
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
     const tab = tabs[0];
@@ -122,9 +125,9 @@ window.onblur = () => {
       injectImmediately: true,
       args: [uuidv4],
       func: (uuidv4) => {
-        // const keyCombinations = document.getElementsByClassName(uuidv4);
-        // for (let keyCombination of keyCombinations)
-        //   keyCombination.remove();
+        const keyCombinations = document.getElementsByClassName(uuidv4);
+        for (let keyCombination of keyCombinations)
+          keyCombination.remove();
       }
     })
   });
@@ -132,5 +135,32 @@ window.onblur = () => {
   window.close();
 }
 
-document.getElementById("keyCombinationInput").addEventListener("input", () => { 
+document.getElementById("key-combination-input").addEventListener("input", () => { 
+}, false)
+
+document.getElementById("key-combination-input").addEventListener("keypress", (event) => { 
+  if (event.key === "Enter") {
+    window.close();
+  
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      const tab = tabs[0];
+    
+      chrome.scripting.executeScript({ 
+        target: { tabId: tab.id },    
+        injectImmediately: true,
+        args: [uuidv4, event.target.value],
+        func: (uuidv4, targetKeyCombChars) => {
+          let targetKeyComb;
+          for (let keyCombination of document.getElementsByClassName(uuidv4)) {
+            if (keyCombination.textContent.toLowerCase().trim() === targetKeyCombChars) {
+              targetKeyComb = keyCombination;
+              break;
+            }
+          }
+          
+          targetKeyComb.parentElement.focus();
+        }
+      });
+    });
+  }
 }, false)
