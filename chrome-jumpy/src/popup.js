@@ -79,7 +79,7 @@ const upperKeyCombHtml = `<div class="${uuidv4}" style="
       border: 2px solid black; 
       box-shadow: 2px 2px black; 
       background: lightgrey; 
-      opacity: 0.90;
+      opacity: 0.75;
       font-weight: 600;
       letter-spacing: .05em; 
       white-space: nowrap;"
@@ -101,8 +101,7 @@ chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       let isInteractableElements = [];      
       for (let i = 0; i < elements.length; i++) {
         if (
-          (elements[i].nodeType == 1 && (elements[i].tagName == "A" || elements[i].tagName == "INPUT" || elements[i].tagName == "BUTTON")) //|| 
-          // (elements[i].scrollWidth > elements[i].clientWidth || elements[i].scrollHeight > elements[i].clientHeight)
+          (elements[i].nodeType == 1 && (elements[i].tagName == "A" || elements[i].tagName == "INPUT" || elements[i].tagName == "BUTTON"))
         )
           isInteractableElements.push(elements[i]);
       }
@@ -126,6 +125,18 @@ window.onblur = () => {
       args: [uuidv4],
       func: (uuidv4) => {
         const keyCombinations = document.getElementsByClassName(uuidv4);
+        for (let keyCombination of keyCombinations)
+          keyCombination.remove();
+        for (let keyCombination of keyCombinations)
+          keyCombination.remove();
+        for (let keyCombination of keyCombinations)
+          keyCombination.remove();
+        for (let keyCombination of keyCombinations)
+          keyCombination.remove();
+        for (let keyCombination of keyCombinations)
+          keyCombination.remove();
+        for (let keyCombination of keyCombinations)
+          keyCombination.remove();
         for (let keyCombination of keyCombinations)
           keyCombination.remove();
       }
